@@ -9,6 +9,11 @@ var naveD;
 var naveE;
 var pouso;
 var pousoI;
+var obstaculo;
+var obstaculoI;
+var bum;
+var combustivel = 100;
+var stadoG = "jogando";
 
 function preload(){
     fundo = loadImage("bg.png");
@@ -20,6 +25,9 @@ function preload(){
     naveD.looping = false;
     naveE.looping = false;
     pousoI = loadImage("lz.png");
+    obstaculoI = loadImage("obstacle.png");
+    bum = loadAnimation("crash2.png","crash3.png");
+    bum.looping = false;
 }
 
 function setup() {
@@ -35,7 +43,12 @@ function setup() {
     nave.addAnimation("cima",naveC);
     nave.addAnimation("direita",naveD);
     nave.addAnimation("esquerda",naveE);
-   
+    nave.addAnimation("bum",bum);
+    obstaculo = createSprite(325,200);
+    obstaculo.addImage(obstaculoI);
+    obstaculo.scale = 0.5;
+    obstaculo.debug = false;
+    obstaculo.setCollider("rectangle",-50,180,150,300);
 }
 
 function draw() {
@@ -45,12 +58,21 @@ function draw() {
     fill("#8A2BE2");
     text("VX:"+round(naveX),20,30);
     text("VY:"+round(naveY),20,45);
+    text("C:"+round(combustivel),20,60);
     drawSprites();
-    naveY+=naveG;
-    nave.position.y+=naveY;
-
-    nave.position.x+=naveX;
-    if(nave.collide(pouso)){
+    if(stadoG==="jogando"){
+        naveY+=naveG;
+        nave.position.y+=naveY;
+        nave.position.x+=naveX;
+        if(nave.collide(pouso)){
+            stadoG = "venceu";
+         
+    }
+        if(nave.collide(obstaculo)){
+            stadoG = "perdeu";
+    }
+    }
+    if(stadoG==="venceu"){
         nave.velocityX = 0;
         nave.velocityY = 0;
         naveX = 0;
@@ -59,19 +81,30 @@ function draw() {
         textSize(17);
         text("Parabens! Você ganhou!!",275,150);
     }
+    if(stadoG==="perdeu"){
+        nave.velocityX = 0;
+        nave.velocityY = 0;
+        naveX = 0;
+        naveY = 0;
+        nave.changeAnimation("bum");
+        text("Sua nave explodiu!",275,150);
+    }
 }
 
 function keyPressed(){
-    if(keyCode===87){
+    if(keyCode===87&&combustivel>0&&stadoG==="jogando"){
         nave.changeAnimation("cima");
         naveY=-3;
+        combustivel-=5;
     }
-    if(keyCode===65){
+    if(keyCode===65&&combustivel>0&&stadoG==="jogando"){
         nave.changeAnimation("esquerda");
         naveX-=0.3;
+        combustivel-=3;
     }
-    if(keyCode===68){
+    if(keyCode===68&&combustivel>0&&stadoG==="jogando"){
         nave.changeAnimation("direita");
         naveX+=0.3;
+        combustivel-=3;
     }
 }
